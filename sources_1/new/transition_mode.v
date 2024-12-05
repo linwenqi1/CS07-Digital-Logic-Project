@@ -29,13 +29,15 @@ module transition_module(
     input second_level_press,
     input third_level_press,
     input self_clean_press,
-    output reg [2:0] state
+    output reg [2:0] state,
+    output [63:0] time_count_down_in_seconds
     );
     reg [2:0] next_state;
     reg [63:0] self_clean_timer;
     reg [63:0] third_level_timer;
     reg [63:0] wait_to_standby_timer;
     reg hurricane_mode_activated;
+    reg [63:0] time_count_down;
     parameter OFF = 3'b000, 
                 STANDBY = 3'b001, 
                 MODE_SELECT = 3'b010, 
@@ -44,9 +46,10 @@ module transition_module(
                 THIRD_LEVEL = 3'b101, 
                 SELF_CLEAN = 3'b110,
                 WAIT_TO_STANDBY = 3'b111;
-    parameter SELF_CLEAN_TIME = 64'd1500000000;
+    parameter SELF_CLEAN_TIME = 64'd6500000000;
     parameter THIRD_LEVEL_TIME = 64'd1000000000;
     parameter WAIT_TO_STANDBY_TIME = 64'd1000000000;
+    parameter CLK_FREQ = 64'd100000000;
     always @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             state <= OFF;
@@ -59,12 +62,14 @@ module transition_module(
             state <= next_state; 
             if(state == SELF_CLEAN) begin
                 self_clean_timer <= self_clean_timer + 1;
+                time_count_down <=  SELF_CLEAN_TIME - self_clean_timer;
             end else begin
                 self_clean_timer <= 0;
             end
                 
             if(state == THIRD_LEVEL) begin
                 third_level_timer <= third_level_timer + 1;
+                time_count_down <= THIRD_LEVEL_TIME - third_level_timer;
                 hurricane_mode_activated <= 1;
             end else begin
                 third_level_timer <= 0;
@@ -72,6 +77,7 @@ module transition_module(
             
             if(state == WAIT_TO_STANDBY) begin
                 wait_to_standby_timer <= wait_to_standby_timer + 1;
+                time_count_down <= WAIT_TO_STANDBY_TIME - wait_to_standby_timer;
             end else begin
                 wait_to_standby_timer <= 0;
             end
@@ -152,6 +158,10 @@ module transition_module(
                 else
                     next_state = WAIT_TO_STANDBY;
             end
+            default: begin
+                next_state = STANDBY;
+            end
         endcase
     end
+    assign time_count_down_in_seconds = time_count_down / CLK_FREQ;
 endmodule

@@ -25,6 +25,7 @@ module time_display_module(
     input rst_n,
     input switch1,
     input switch2,
+    input need_count_down,
     input en,
     input [5:0] power_on_hour,
     input [5:0] power_on_min,
@@ -32,32 +33,47 @@ module time_display_module(
     input [5:0] working_hour,
     input [5:0] working_min,
     input [5:0] working_sec,
+    input [5:0] count_down_hour,
+    input [5:0] count_down_min,
+    input [5:0] count_down_sec,
     output reg [3:0] seg_en,
     output [7:0] seg_out
     );
     reg [1:0] scan_cnt;
     reg [3:0] content_display [3:0];
-    always @(switch1, switch2) begin
-        case({switch1, switch2})
-            2'b00: begin
+    always @(switch1, switch2, need_count_down) begin
+        casex({need_count_down, switch1, switch2})
+            3'b10x: begin
+                content_display[0] = count_down_sec % 10;
+                content_display[1] = count_down_sec / 10;
+                content_display[2] = count_down_min % 10;
+                content_display[3] = count_down_min / 10;
+            end
+            3'b11x: begin
+                content_display[0] = count_down_min % 10;
+                content_display[1] = count_down_min / 10;
+                content_display[2] = count_down_hour % 10;
+                content_display[3] = count_down_hour / 10;
+            end
+            3'b000: begin
                 content_display[0] = power_on_sec % 10;
                 content_display[1] = power_on_sec / 10;
                 content_display[2] = power_on_min % 10;
                 content_display[3] = power_on_min / 10;
             end
-            2'b01: begin
+            3'b001: begin
                 content_display[0] = working_sec % 10;
                 content_display[1] = working_sec / 10;
                 content_display[2] = working_min % 10;
                 content_display[3] = working_min / 10;
             end
-            2'b10: begin
+            3'b010: begin
                 content_display[0] = power_on_min % 10;
                 content_display[1] = power_on_min / 10;
                 content_display[2] = power_on_hour % 10;
                 content_display[3] = power_on_hour / 10;
             end
-            2'b11: begin
+            3'b011: begin
                 content_display[0] = working_min % 10;
                 content_display[1] = working_min / 10;
                 content_display[2] = working_hour % 10;

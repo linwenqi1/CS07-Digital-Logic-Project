@@ -48,6 +48,10 @@ module top_module(
     wire [5:0] working_hour;
     wire [5:0] working_min;
     wire [5:0] working_sec;
+    wire [63:0] time_count_down_in_seconds;
+    wire [5:0] count_down_sec;
+    wire [5:0] count_down_min;
+    wire [5:0] count_down_hour;
     clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_1Hz(clk_1Hz));
     key_debounce debounce0(.clk(clk),.rst_n(rst_n),.key_in(power_menu_button),.key_out(power_menu_stable));
     key_debounce debounce1(.clk(clk),.rst_n(rst_n),.key_in(first_level_button),.key_out(first_level_stable));
@@ -70,9 +74,20 @@ module top_module(
         .second_level_press(second_level_stable),
         .third_level_press(third_level_stable),
         .self_clean_press(self_clean_stable),
-        .state(state)
+        .state(state),
+        .time_count_down_in_seconds(time_count_down_in_seconds)
+        );
+    time_converter_module converter1(
+        .clk_500Hz(clk_500Hz),
+        .rst_n(rst_n),
+        .total_seconds(time_count_down_in_seconds),
+        .seconds(count_down_sec),
+        .minutes(count_down_min),
+        .hours(count_down_hour)
         );
     power_state_indicator judge(
+        .clk(clk),
+        .rst_n(rst_n),
         .state(state),
         .is_power_on(is_power_on),
         .is_working(is_working),
@@ -106,12 +121,16 @@ module top_module(
         .en(is_power_on),
         .switch1(display_switch1),
         .switch2(display_switch2),
+        .need_count_down(is_countdown_active),
         .power_on_hour(power_on_hour),
         .power_on_min(power_on_min),
         .power_on_sec(power_on_sec),
         .working_hour(working_hour),
         .working_min(working_min),
         .working_sec(working_sec),
+        .count_down_hour(count_down_hour),
+        .count_down_min(count_down_min),
+        .count_down_sec(count_down_sec),
         .seg_en(seg_en[7:4]),
         .seg_out(seg_out1)
         );
