@@ -22,7 +22,7 @@
 
 module mode_indicator(
     input [2:0] state,
-    output reg [5:0] mode_led
+    output reg [6:0] mode_led
     );
     parameter OFF = 3'b000, 
                STANDBY = 3'b001, 
@@ -30,16 +30,19 @@ module mode_indicator(
                FIRST_LEVEL = 3'b011, 
                SECOND_LEVEL = 3'b100, 
                THIRD_LEVEL = 3'b101, 
-               SELF_CLEAN = 3'b110;
+               SELF_CLEAN = 3'b110,
+               WAIT_TO_STANDBY = 3'b111;
     always @(state) begin
         case(state)
-            OFF: mode_led = 6'b000000;
-            STANDBY: mode_led = 6'b000001;
-            MODE_SELECT: mode_led = 6'b000010;
-            FIRST_LEVEL: mode_led = 6'b000100;
-            SECOND_LEVEL: mode_led = 6'b001000;
-            THIRD_LEVEL: mode_led = 6'b010000;
-            SELF_CLEAN: mode_led = 6'b100000;
+            OFF: mode_led = 7'b0000000;
+            STANDBY: mode_led = 7'b0000001;
+            MODE_SELECT: mode_led = 7'b1000000;
+            FIRST_LEVEL: mode_led = 7'b0000010;
+            SECOND_LEVEL: mode_led = 7'b0000100;
+            THIRD_LEVEL: mode_led = 7'b0001000;
+            SELF_CLEAN: mode_led = 7'b0100000;
+            WAIT_TO_STANDBY: mode_led = 7'b0010000;
+            default: mode_led =  7'b0000000;
         endcase
     end
 endmodule

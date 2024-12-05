@@ -29,13 +29,26 @@ module top_module(
     input third_level_button,
     input self_clean_button,
     input light_switch,
-    output [5:0] mode_led,
-    output lighting_func
+    input display_switch1,  //1: hour min; 0: min, sec
+    input display_switch2,  //1: working_time; 0: current_time
+    output [6:0] mode_led,
+    output lighting_func,
+    output [7:0] seg_en,
+    output [7:0] seg_out1
+    //output [7:0] seg_out2,
     );
+    wire clk_1Hz, clk_500Hz;
     wire [2:0] state;
     wire power_menu_short_press, power_menu_long_press;
     wire power_menu_stable, first_level_stable, second_level_stable, third_level_stable, self_clean_stable;
-    wire is_power_on, is_working;  //Power   Extraction
+    wire is_power_on, is_working, is_self_clean, is_standby, is_countdown_active;  //Power   Extraction  Self_clean
+    wire [5:0] power_on_hour;
+    wire [5:0] power_on_min;
+    wire [5:0] power_on_sec;
+    wire [5:0] working_hour;
+    wire [5:0] working_min;
+    wire [5:0] working_sec;
+    clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_1Hz(clk_1Hz));
     key_debounce debounce0(.clk(clk),.rst_n(rst_n),.key_in(power_menu_button),.key_out(power_menu_stable));
     key_debounce debounce1(.clk(clk),.rst_n(rst_n),.key_in(first_level_button),.key_out(first_level_stable));
     key_debounce debounce2(.clk(clk),.rst_n(rst_n),.key_in(second_level_button),.key_out(second_level_stable));
@@ -62,11 +75,46 @@ module top_module(
     power_state_indicator judge(
         .state(state),
         .is_power_on(is_power_on),
-        .is_working(is_working)
+        .is_working(is_working),
+        .is_self_clean(is_self_clean),
+        .is_standby(is_standby),
+        .is_countdown_active(is_countdown_active)
         );
     mode_indicator indicator2(
         .state(state),
         .mode_led(mode_led)
         );
+    timer_module timer1(   //当前时间
+        .clk_1Hz(clk_1Hz),
+        .rst_n(rst_n & is_power_on),
+        .start_timer(is_power_on),
+        .hour(power_on_hour),
+        .min(power_on_min),
+        .sec(power_on_sec)
+        );
+    timer_module timer2( //工作时间
+        .clk_1Hz(clk_1Hz),
+        .rst_n(rst_n & is_power_on),
+        .start_timer(is_working),
+        .hour(working_hour),
+        .min(working_min),
+        .sec(working_sec)
+        );
+    time_display_module display1(
+        .clk_500Hz(clk_500Hz),
+        .rst_n(rst_n),
+        .en(is_power_on),
+        .switch1(display_switch1),
+        .switch2(display_switch2),
+        .power_on_hour(power_on_hour),
+        .power_on_min(power_on_min),
+        .power_on_sec(power_on_sec),
+        .working_hour(working_hour),
+        .working_min(working_min),
+        .working_sec(working_sec),
+        .seg_en(seg_en[7:4]),
+        .seg_out(seg_out1)
+        );
     assign lighting_func = is_power_on & light_switch;
+    
 endmodule
