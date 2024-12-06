@@ -31,13 +31,16 @@ module top_module(
     input light_switch,
     input display_switch1,  //1: hour min; 0: min, sec
     input display_switch2,  //1: working_time; 0: current_time
+    input current_time_set_switch,
+    input reminder_duration_set_switch,
+    input gesture_time_set_switch,
     output [6:0] mode_led,
     output lighting_func,
     output [7:0] seg_en,
     output [7:0] seg_out1
     //output [7:0] seg_out2,
     );
-    wire clk_1Hz, clk_500Hz;
+    wire clk_100Hz, clk_500Hz;
     wire [2:0] state;
     wire power_menu_short_press, power_menu_long_press;
     wire power_menu_stable, first_level_stable, second_level_stable, third_level_stable, self_clean_stable;
@@ -52,7 +55,8 @@ module top_module(
     wire [5:0] count_down_sec;
     wire [5:0] count_down_min;
     wire [5:0] count_down_hour;
-    clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_1Hz(clk_1Hz));
+    wire time_unit_toggle_button, time_increment_button, time_decrement_button;
+    clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_100Hz(clk_100Hz));
     key_debounce debounce0(.clk(clk),.rst_n(rst_n),.key_in(power_menu_button),.key_out(power_menu_stable));
     key_debounce debounce1(.clk(clk),.rst_n(rst_n),.key_in(first_level_button),.key_out(first_level_stable));
     key_debounce debounce2(.clk(clk),.rst_n(rst_n),.key_in(second_level_button),.key_out(second_level_stable));
@@ -100,7 +104,7 @@ module top_module(
         .mode_led(mode_led)
         );
     timer_module timer1(   //当前时间
-        .clk_1Hz(clk_1Hz),
+        .clk_100Hz(clk_100Hz),
         .rst_n(rst_n & is_power_on),
         .start_timer(is_power_on),
         .hour(power_on_hour),
@@ -108,7 +112,7 @@ module top_module(
         .sec(power_on_sec)
         );
     timer_module timer2( //工作时间
-        .clk_1Hz(clk_1Hz),
+        .clk_100Hz(clk_100Hz),
         .rst_n(rst_n & is_power_on),
         .start_timer(is_working),
         .hour(working_hour),
@@ -134,6 +138,8 @@ module top_module(
         .seg_en(seg_en[7:4]),
         .seg_out(seg_out1)
         );
-    assign lighting_func = is_power_on & light_switch;
-    
+    assign lighting_func = is_power_on & light_switch;  //照明功能
+    assign time_unit_toggle_button = second_level_stable;   //按键复用, 时分秒切换键
+    assign time_increment_button = third_level_stable;    //加1键
+    assign time_decrement_button = first_level_stable;    //减1键
 endmodule

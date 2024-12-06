@@ -23,18 +23,18 @@ module clk_div(
     input clk,
     input rst_n,
     output reg clk_500Hz,
-    output reg clk_1Hz
+    output reg clk_100Hz
     );
     parameter period1 = 200000;
-    parameter period2 = 100000000;
+    parameter period2 = 1000000;
     reg [31:0] cnt_500Hz;
-    reg [31:0] cnt_1Hz;
+    reg [31:0] cnt_100Hz;
     always @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             cnt_500Hz <= 0;
             clk_500Hz <= 0;
-            cnt_1Hz <= 0;
-            clk_1Hz <= 0;
+            cnt_100Hz <= 0;
+            clk_100Hz <= 0;
         end else begin
             if(cnt_500Hz == ((period1 >> 1) - 1)) begin
                 clk_500Hz <= ~clk_500Hz;
@@ -43,11 +43,11 @@ module clk_div(
                 cnt_500Hz <= cnt_500Hz + 1;
             end
             
-            if(cnt_1Hz == ((period2 >> 1) - 1)) begin
-                clk_1Hz <= ~clk_1Hz;
-                    cnt_1Hz <= 0;
+            if(cnt_100Hz == ((period2 >> 1) - 1)) begin
+                clk_100Hz <= ~clk_100Hz;
+                    cnt_100Hz <= 0;
             end else begin
-                cnt_1Hz <= cnt_1Hz + 1;
+                cnt_100Hz <= cnt_100Hz + 1;
             end
         end
     end

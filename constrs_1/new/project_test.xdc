@@ -70,3 +70,10 @@ set_property PACKAGE_PIN D5 [get_ports {seg_out1[0]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {mode_led[6]}]
 set_property PACKAGE_PIN H6 [get_ports {mode_led[6]}]
 
+
+set_property IOSTANDARD LVCMOS33 [get_ports gesture_time_set_switch]
+set_property IOSTANDARD LVCMOS33 [get_ports reminder_duration_set_switch]
+set_property IOSTANDARD LVCMOS33 [get_ports current_time_set_switch]
+set_property PACKAGE_PIN P3 [get_ports current_time_set_switch]
+set_property PACKAGE_PIN R2 [get_ports gesture_time_set_switch]
+set_property PACKAGE_PIN P2 [get_ports reminder_duration_set_switch]

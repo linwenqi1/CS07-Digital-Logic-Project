@@ -100,5 +100,5 @@ module time_display_module(
             default: seg_en=4'b0000;
         endcase
     end
-    light_7seg_ego1 u0(.sw(content_display[scan_cnt]), .seg_out(seg_out));
+    light_7seg_ego1 u0(.sw(content_display[scan_cnt]), .seg_out(seg_out), .dp(scan_cnt == 2'b10));
 endmodule

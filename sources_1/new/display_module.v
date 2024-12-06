@@ -68,5 +68,5 @@ module display_module(
             end
         endcase
     end
-    light_7seg_ego1 u0(.sw(content_display), .seg_out(seg_out));
+    light_7seg_ego1 u0(.sw(content_display), .seg_out(seg_out), .dp(1'b0));
 endmodule

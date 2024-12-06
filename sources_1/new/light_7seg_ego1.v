@@ -21,7 +21,9 @@
 
 
 module light_7seg_ego1(
-    input [3:0]sw, output reg [7:0] seg_out
+    input [3:0]sw, 
+    input dp,
+    output reg [7:0] seg_out
     );
     always @(*) begin
         case(sw)
@@ -37,6 +39,11 @@ module light_7seg_ego1(
             4'h9: seg_out = 8'b11110110;
             default: seg_out = 8'b00000000;
         endcase
+        if (dp) begin
+            seg_out[0] = 1'b1;  // Turn on decimal point
+        end else begin
+            seg_out[0] = 1'b0;  // Turn off decimal point
+        end
     end
 endmodule
 
