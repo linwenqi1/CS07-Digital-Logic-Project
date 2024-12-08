@@ -77,3 +77,10 @@ set_property IOSTANDARD LVCMOS33 [get_ports current_time_set_switch]
 set_property PACKAGE_PIN P3 [get_ports current_time_set_switch]
 set_property PACKAGE_PIN R2 [get_ports gesture_time_set_switch]
 set_property PACKAGE_PIN P2 [get_ports reminder_duration_set_switch]
+
+set_property IOSTANDARD LVCMOS33 [get_ports clean_warning_light]
+set_property PACKAGE_PIN K2 [get_ports clean_warning_light]
+
+set_property IOSTANDARD LVCMOS33 [get_ports tx]
+set_property PACKAGE_PIN T4 [get_ports tx]
+

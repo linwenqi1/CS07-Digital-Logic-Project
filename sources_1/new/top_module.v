@@ -36,9 +36,11 @@ module top_module(
     input gesture_time_set_switch,
     output [6:0] mode_led,
     output lighting_func,
+    output clean_warning_light,
     output [7:0] seg_en,
-    output [7:0] seg_out1
+    output [7:0] seg_out1,
     //output [7:0] seg_out2,
+    output tx
     );
     wire clk_100Hz, clk_500Hz;
     wire [2:0] state;
@@ -57,6 +59,7 @@ module top_module(
     wire [5:0] count_down_hour;
     wire time_unit_toggle_button, time_increment_button, time_decrement_button;
     wire time_unit_toggle_press_once, time_increment_press_once, time_decrement_press_once;
+    wire clean_warning;
     clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_100Hz(clk_100Hz));
     key_debounce debounce0(.clk(clk),.rst_n(rst_n),.key_in(power_menu_button),.key_out(power_menu_stable));
     key_debounce debounce1(.clk(clk),.rst_n(rst_n),.key_in(first_level_button),.key_out(first_level_stable));
@@ -67,6 +70,7 @@ module top_module(
     assign time_unit_toggle_button = second_level_stable;   //按键复用, 时分秒切换键
     assign time_increment_button = third_level_stable;    //加1键
     assign time_decrement_button = first_level_stable;    //减1键
+    assign clean_warning_light = clean_warning;
     key_press_detector detector1(
             .clk(clk),
             .key_input(power_menu_stable),
@@ -146,6 +150,18 @@ module top_module(
         .min(working_min),
         .sec(working_sec)
         );
+    clean_reminder reminder1(
+        .clk_100Hz(clk_100Hz),
+        .rst_n(rst_n),
+        .is_standby(is_standby),
+        .working_hour(working_hour),
+        .working_min(working_min),
+        .working_sec(working_sec),
+        .hour_threshold(0),  //暂时处理，待调整模块写好后传入
+        .min_threshold(1),
+        .sec_threshold(0),
+        .warning(clean_warning)
+        );
     time_display_module display1(
         .clk_500Hz(clk_500Hz),
         .rst_n(rst_n),
@@ -165,5 +181,16 @@ module top_module(
         .seg_en(seg_en[7:4]),
         .seg_out(seg_out1)
         );
-    
+    uart_tx uart_tx_ins(
+        .clk(clk),
+        .rst_n(rst_n),
+        .current_hour(power_on_hour),
+        .current_min(power_on_min),
+        .current_sec(power_on_sec),
+        .working_hour(working_hour),
+        .working_min(working_min),
+        .working_sec(working_sec),
+        .state(state),
+        .tx(tx)
+        );
 endmodule
