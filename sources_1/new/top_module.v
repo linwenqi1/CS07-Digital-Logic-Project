@@ -32,14 +32,14 @@ module top_module(
     input display_switch1,  //1: hour min; 0: min, sec
     input display_switch2,  //1: working_time; 0: current_time
     input current_time_set_switch,
-    input reminder_duration_set_switch,
-    input gesture_time_set_switch,
+    input reminder_duration_set_switch,//fjm 调整智能提醒时间上限的开关
+    input gesture_time_set_switch,//调整手势时间的开关
     output [6:0] mode_led,
     output lighting_func,
     output clean_warning_light,
-    output [7:0] seg_en,
+    output [7:0] seg_en,//[7:4]是左边
     output [7:0] seg_out1,
-    //output [7:0] seg_out2,
+    output [7:0] seg_out2,
     output tx
     );
     wire clk_100Hz, clk_500Hz;
@@ -53,6 +53,10 @@ module top_module(
     wire [5:0] working_hour;
     wire [5:0] working_min;
     wire [5:0] working_sec;
+    wire [5:0] hour_threshold;//fjm 智能提醒时间上限
+    wire [5:0] min_threshold;//fjm
+    wire [1:0] adjust_reminder_state;//fjm 当前调整的状态 00 01是调整智能提醒的分钟小时
+    wire [5:0] second_gesture;//fjm 手势时间
     wire [63:0] time_count_down_in_seconds;
     wire [5:0] count_down_sec;
     wire [5:0] count_down_min;
@@ -151,17 +155,32 @@ module top_module(
         .sec(working_sec)
         );
     clean_reminder reminder1(
+        //智能提醒模块
         .clk_100Hz(clk_100Hz),
         .rst_n(rst_n),
         .is_standby(is_standby),
         .working_hour(working_hour),
         .working_min(working_min),
         .working_sec(working_sec),
-        .hour_threshold(0),  //暂时处理，待调整模块写好后传入
+        .hour_threshold(hour_threshold),  //fjm
+        .min_threshold(min_threshold), //fjm
+        .adjust_state(adjust_reminder_state),
+        /*.hour_threshold(0),
         .min_threshold(1),
-        .sec_threshold(0),
+        .sec_threshold(0),*/
         .warning(clean_warning)
         );
+    //fjm
+    gesture gesture1(
+        .clk_100Hz(clk_100Hz),
+        .rst_n(rst_n),
+        .is_standby(is_standby),
+        .reminder_duration_set_switch(reminder_duration_set_switch),
+        .time_increment_press_once(time_increment_press_once),
+        .time_decrement_press_once(time_decrement_press_once),
+        .second_gesture(second_gesture)
+    );
+    //---
     time_display_module display1(
         .clk_500Hz(clk_500Hz),
         .rst_n(rst_n),
@@ -181,6 +200,21 @@ module top_module(
         .seg_en(seg_en[7:4]),
         .seg_out(seg_out1)
         );
+    //fjm
+    timeSet_display_module display2(
+        .clk_500Hz(clk_500Hz),
+        .rst_n(rst_n),
+        .hour_threshold(hour_threshold),
+        .min_threshold(min_threshold),
+        .second_gesture(second_gesture),
+        .adjust_state(adjust_reminder_state),
+        .reminder_duration_set_switch(reminder_duration_set_switch),
+        .gesture_time_set_switch(gesture_time_set_switch),
+        .is_standby(is_standby),
+        .seg_en(seg_en[0:3]),
+        .seg_out(seg_out2)
+    ) ;
+    //---
     uart_tx uart_tx_ins(
         .clk(clk),
         .rst_n(rst_n),
