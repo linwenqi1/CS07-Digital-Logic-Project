@@ -66,7 +66,7 @@ module top_module(
     wire [5:0] sec_threshold;
     wire [2:0] adjust_state;
     wire [5:0] gesture_sec;
-    wire clean_warning;
+    wire clean_warning, rst_button_standby;
     clk_div div1(.clk(clk), .rst_n(rst_n), .clk_500Hz(clk_500Hz), .clk_100Hz(clk_100Hz));
     key_debounce debounce0(.clk(clk),.rst_n(rst_n),.key_in(power_menu_button),.key_out(power_menu_stable));
     key_debounce debounce1(.clk(clk),.rst_n(rst_n),.key_in(first_level_button),.key_out(first_level_stable));
@@ -78,6 +78,7 @@ module top_module(
     assign time_unit_toggle_button = second_level_stable;   //°´¼ü¸´ÓÃ, Ê±·ÖÃëÇÐ»»¼ü
     assign time_increment_button = third_level_stable;    //¼Ó1¼ü
     assign time_decrement_button = first_level_stable;    //¼õ1¼ü
+    assign rst_button_standby = self_clean_stable;
     assign clean_warning_light = clean_warning;
     key_press_detector detector1(
             .clk(clk),
@@ -167,7 +168,7 @@ module top_module(
         );
     set_treshold setter1(
         .clk_100Hz(clk_100Hz),
-        .rst_n(rst_n & is_power_on),
+        .rst_n(rst_n & (~is_standby | ~rst_button_standby)),
         .adjust_en(is_standby & reminder_duration_set_switch),
         .unit_toggle_press_once(time_unit_toggle_press_once),
         .time_increment_press_once(time_increment_press_once),
@@ -179,7 +180,7 @@ module top_module(
         );
     set_gesture_time setter2(
         .clk_100Hz(clk_100Hz),
-        .rst_n(rst_n & is_power_on),
+        .rst_n(rst_n & (~is_standby | ~rst_button_standby)),
         .adjust_en(is_standby & gesture_time_set_switch),
         .time_increment_press_once(time_increment_press_once),
         .time_decrement_press_once(time_decrement_press_once),

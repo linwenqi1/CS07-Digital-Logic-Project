@@ -47,7 +47,7 @@ module power_state_indicator(
             is_countdown_active <= 0;
         end begin
             is_power_on <= (state != OFF);
-            is_working <= (state == FIRST_LEVEL) || (state == SECOND_LEVEL) || (state == THIRD_LEVEL);
+            is_working <= (state == FIRST_LEVEL) || (state == SECOND_LEVEL) || (state == THIRD_LEVEL) || (state == WAIT_TO_STANDBY);
             is_self_clean <= (state == SELF_CLEAN);
             is_standby <= (state == STANDBY);
             is_countdown_active <= (state == THIRD_LEVEL) || (state == WAIT_TO_STANDBY) || (state == SELF_CLEAN);
