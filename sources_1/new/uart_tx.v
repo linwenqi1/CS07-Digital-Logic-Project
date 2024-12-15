@@ -29,6 +29,13 @@ module uart_tx(
     input [5:0] working_hour, 
     input [5:0] working_min, 
     input [5:0] working_sec,  // 工作时间
+    input [5:0] count_down_hour,
+    input [5:0] count_down_min,
+    input [5:0] count_down_sec,
+    input [5:0] hour_threshold,
+    input [5:0] min_threshold,
+    input [5:0] sec_threshold,
+    input light_on,
     input [2:0] state,  // 系统状态
     output reg tx 
     );
@@ -82,9 +89,16 @@ module uart_tx(
                             4: data <= {2'b0, working_hour};
                             5: data <= {2'b0, working_min};
                             6: data <= {2'b0, working_sec};
+                            7: data <= {2'b0, count_down_hour};
+                            8: data <= {2'b0, count_down_min};
+                            9: data <= {2'b0, count_down_sec};
+                            10: data <= {2'b0, hour_threshold};
+                            11: data <= {2'b0, min_threshold};
+                            12: data <= {2'b0, sec_threshold};
+                            13: data <= {7'b0, light_on};
                             default: data <= 8'b11111111;
                         endcase
-                        if(byte_index == 7)
+                        if(byte_index == 14)
                             byte_index <= 0;
                         else
                             byte_index <= byte_index + 1;  // 切换到下一个字符

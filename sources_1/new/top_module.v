@@ -239,6 +239,13 @@ module top_module(
         .working_hour(working_hour),
         .working_min(working_min),
         .working_sec(working_sec),
+        .count_down_hour(count_down_hour),
+        .count_down_min(count_down_min),
+        .count_down_sec(count_down_sec),
+        .hour_threshold(hour_threshold),
+        .min_threshold(min_threshold),
+        .sec_threshold(sec_threshold),
+        .light_on(is_power_on & light_switch),
         .state(state),
         .tx(tx)
         );
